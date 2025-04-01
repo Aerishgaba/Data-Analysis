@@ -1,0 +1,163 @@
+---
+title: "COMP4033 Assignment 2 - Data Analysis"
+author: "Group 6"
+date: "`r Sys.Date()`"
+output: pdf_document
+---
+
+## Github Repository - 
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE, warning=FALSE, message=FALSE)
+library(dplyr)
+library(ggplot2)
+```
+
+```{r}
+##Loading the dataset 
+IMDB_Action <- read.csv("/Users/aerishgaba/Desktop/Projects/IMDB_Action.csv")
+```
+
+```{r}
+## 1. Structure of the Dataset
+str(IMDB_Action)
+df = IMDB_Action
+```
+
+
+```{r}
+## 2. Variables of the dataset
+variables = names(df)
+variables
+```
+
+```{r}
+## 3. First 16 rows of the dataset
+top_15 = head(df, 15)
+top_15
+```
+
+```{r}
+## 4. User-defined function to calculate the missing values
+missing_values = function(df) {
+  n = nrow(df)
+  missing = data.frame(
+    variable = character(),
+    missing_values = numeric(),
+    percentage = numeric()
+  )
+  for (i in 1:ncol(df)) {
+    missing[i, 1] = names(df)[i]
+    missing[i, 2] = sum(is.na(df[, i]))
+    missing[i, 3] = (missing[i, 2] / n) * 100
+  }
+  return(missing)
+}
+
+# Missing values in the dataset
+missing_values(df)
+```
+
+```{r}
+## 5. Filter rows with Votes more then 100
+df_filtered = df[df$Votes > 100, ]
+df_filtered
+```
+
+```{r}
+## 6. Independent and Dependent Variables
+independent_var <- df$Title
+dependent_var <- df$Rating
+
+# Create new dataframe
+new_df <- data.frame(independent_var, dependent_var)
+new_df
+```
+
+
+```{r}
+## 7. Remove missing values from the dataset except Popularity
+df_no_na = df[complete.cases(df[, 9]), ]
+df_no_na
+```
+
+```{r}
+## 8. Identify and remove duplicate rows
+df_no_duplicates = df_no_na[!duplicated(df_no_na), ]
+df_no_duplicates
+```
+
+```{r}
+## 9. Reorder by column 'Rating' in descending order
+df_ordered = df_no_duplicates[order(-df_no_duplicates$Rating), ]
+df_ordered
+```
+
+```{r}
+## 10. Rename 'Release Year' column to 'Released'
+df_renamed = rename(df_ordered, Released = `Release.Year`)
+df_renamed
+```
+
+```{r}
+## 11. Add new variables in your data frame by multiplying Votes by 2
+df_new_var = df_renamed
+df_new_var$Votes_x_2 = df_renamed$Votes * 2
+df_new_var
+```
+
+```{r}
+## 12. Create Training Set
+# Split data (80% training)
+set.seed(123)
+train_indices <- sample(1:nrow(df_new_var), 0.8 * nrow(df_new_var))
+train_set <- df_new_var[train_indices, ]
+train_set
+```
+
+```{r}
+## 13. Summary of the dataset
+summary(df_new_var)
+```
+
+```{r}
+## 14. Mean, Mode and Median of Rating column
+mean_rating = mean(df_new_var$Rating, na.rm = TRUE)
+mode_rating = as.numeric(names(sort(table(df_new_var$Rating), decreasing = TRUE)[1]))
+median_rating = median(df_new_var$Rating, na.rm = TRUE)
+
+mean_rating
+mode_rating
+median_rating
+```
+
+```{r}
+## 15. Scatterplot for Rating and Released column
+ggplot(df_new_var, aes(x = Rating, y = Released)) +
+  geom_point() +
+  labs(title = "Scatterplot for Rating and Released column")
+```
+
+```{r}
+## 16.Bar plot for Rating column
+ggplot(df_new_var, aes(x = Rating)) +
+  geom_bar() +
+  labs(title = "Bar plot for Rated and Rating column by binning the Rating column")
+
+#Barplot for Rating column
+ggplot(df_new_var, aes(x = Rated)) +
+  geom_bar(fill = "darkred") +
+  labs(title = "Bar plot for Rated column")
+```
+
+```{r}
+# Converting Released column to numeric
+df_new_var$Released = as.numeric(as.character(df_new_var$Released))
+summary(df_new_var)
+# Removing missing values from Released column
+df_new_var = df_new_var[complete.cases(df_new_var$Released), ]
+summary(df_new_var)
+
+## 17. Pearson corrrelation between Title and Rating
+cor(df_new_var$Released, df_new_var$Rating, method = "pearson")
+```
+
