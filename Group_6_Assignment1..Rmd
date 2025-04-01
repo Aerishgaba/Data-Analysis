@@ -1,5 +1,5 @@
 ---
-title: "COMP4033 Assignment 2 - Data Analysis"
+title: "COMP4028 Assignment - Data Analysis"
 author: "Group 6"
 date: "`r Sys.Date()`"
 output: pdf_document
